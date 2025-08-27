@@ -274,7 +274,36 @@ with gr.Blocks() as demo:
             )
 
         # Main Column
-        with gr.Column(scale=3):
+        main_content_no_channels_html = gr.HTML(
+            """
+<div style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+">
+    <div style="
+        border: 2px solid #FFA500;
+        background-color: #FFF8E1;
+        color: #FF6F00;
+        padding: 20px 30px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    ">
+        ⚠️ No channels added.<br>
+        Please add channels from the side bar
+    </div>
+</div>
+
+            """,
+            visible=True if not channel_list_state.value else False,
+        )
+        with gr.Column(
+            scale=3, visible=True if channel_list_state.value else False
+        ) as main_content:
             with gr.Row():
                 question = gr.Textbox(
                     label="Ask a Question",
@@ -295,7 +324,7 @@ with gr.Blocks() as demo:
                     "Show me some videos that mention Ranganatha.",
                     "Slokas that mention gajendra moksham",
                     "Poorvikalyani Raga Alapana",
-                    "Virutham from chathusloki"
+                    "Virutham from chathusloki",
                 ],
                 inputs=question,
             )
@@ -350,6 +379,11 @@ with gr.Blocks() as demo:
                 outputs=[channel_radio],  # update the radio choices
             ).then(
                 enable_component, outputs=[delete_channel_btn]
+            )
+        channel_list_state.change(
+                toggle_no_data_found,
+                inputs=[channel_list_state],
+                outputs=[main_content, main_content_no_channels_html],
             )
 
 
