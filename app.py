@@ -1,6 +1,7 @@
 import os
 import re
 import gradio as gr
+from gradio_modal import Modal
 import chromadb
 from modules.collector import fetch_channel_videos_from_url
 from modules.db import get_indexed_channels
@@ -30,13 +31,15 @@ def refresh_channel(api_key, channel_url: str):
 
 
 def index_channels(channel_urls: str):
+    yield "saving ...", gr.update()
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
     urls = [u.strip() for u in re.split(r"[\n,]+", channel_urls) if u.strip()]
     total_videos = sum(refresh_channel(yt_api_key, url) for url in urls)
-    return (
+    yield (
         f"✅ Indexed {total_videos} videos from {len(urls)} channels.",
         list_channels(),
     )
+    return
 
 
 def list_channels():
@@ -84,18 +87,38 @@ def handle_query(query: str):
 # -------------------------------
 def show_component():
     return gr.update(visible=True)
+
+
 def hide_component():
     return gr.update(visible=False)
+
+
 def close_component():
     return gr.update(open=False)
+
+
 def open_component():
     return gr.update(open=True)
 
 
+def disable_component():
+    return gr.update(interactive=False)
+
+
+def enable_component():
+    return gr.update(interactive=True)
+
+
+def clear_component():
+    return gr.update(value="")
+
+
+def show_loading():
+    return gr.update(value="loading")
+
+
 with gr.Blocks() as demo:
     gr.Markdown("## 📺 YouTube Metadata Q&A Agent")
-    from gradio_modal import Modal
-
     with Modal(visible=False) as add_channel_modal:
         channel_input = gr.Textbox(
             label="Channel URLs",
@@ -109,9 +132,7 @@ with gr.Blocks() as demo:
             gr.Markdown("### 📺 Channels")
             channel_list = gr.Markdown(list_channels())
             with gr.Row():
-                refresh_all_btn = gr.Button(
-                    "🔄 Refresh", size="sm", scale=0
-                )
+                refresh_all_btn = gr.Button("🔄 Refresh", size="sm", scale=0)
                 add_channels_btn = gr.Button("+ Add", size="sm", scale=0)
             refresh_status = gr.Markdown(label="Refresh Status", container=False)
             refresh_all_btn.click(
@@ -119,12 +140,22 @@ with gr.Blocks() as demo:
                 inputs=None,
                 outputs=[refresh_status, channel_list],
             )
-            add_channels_btn.click(close_component, outputs=[my_sidebar]).then(show_component, outputs=[add_channel_modal])
+            add_channels_btn.click(close_component, outputs=[my_sidebar]).then(
+                show_component, outputs=[add_channel_modal]
+            )
             save_add_channels_btn.click(
+                disable_component, outputs=[save_add_channels_btn]
+            ).then(
                 index_channels,
                 inputs=[channel_input],
                 outputs=[index_status, channel_list],
-            ).then(hide_component, outputs=[add_channel_modal]).then(open_component, outputs=[my_sidebar])
+            ).then(
+                hide_component, outputs=[add_channel_modal]
+            ).then(
+                open_component, outputs=[my_sidebar]
+            ).then(
+                enable_component, outputs=[save_add_channels_btn]
+            )
 
         with gr.Column(scale=3):
             question = gr.Textbox(
@@ -143,7 +174,14 @@ with gr.Blocks() as demo:
             video_embed = gr.HTML()  # iframe embeds will render here
 
             ask_btn = gr.Button("Get Answer")
-            ask_btn.click(handle_query, inputs=question, outputs=[answer, video_embed])
+            ask_status = gr.Markdown()
+            ask_btn.click(show_loading, outputs=[ask_status]).then(
+                disable_component, outputs=[ask_btn]
+            ).then(handle_query, inputs=question, outputs=[answer, video_embed]).then(
+                enable_component, outputs=[ask_btn]
+            ).then(
+                clear_component, outputs=[ask_status]
+            )
 
 if __name__ == "__main__":
     demo.launch()

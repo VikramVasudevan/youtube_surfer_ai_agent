@@ -1,13 +1,11 @@
 ---
-title: Youtube Channel Surfer AI
+title: youtube-channel-surfer-ai
 license: mit
 emoji: "📺"
-colorFrom: "yellow"
-colorTo: "orange"
 app_file: "app.py"
 sdk: "gradio"
 pinned: false
-python_version: 3.16
+python_version: 3.13
 ---
 
 # 📺 YouTube Metadata Q&A Agent
