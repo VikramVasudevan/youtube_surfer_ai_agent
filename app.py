@@ -306,7 +306,7 @@ def init():
     channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam"
     for resp in index_channels(channels):
         print(resp)
-        
+
 if __name__ == "__main__":
-    init()
+    # init()
     demo.launch()

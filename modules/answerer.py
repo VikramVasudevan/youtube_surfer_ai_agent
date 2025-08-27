@@ -37,9 +37,7 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
 
     # Build context lines for the LLM
     context_lines = []
-    top_videos_list = []
     for r in results:
-        # Ensure each result is a dict
         if not isinstance(r, dict):
             continue
         vid_id = r.get("video_id", "")
@@ -48,12 +46,6 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
         description = r.get("description", "")
         context_lines.append(
             f"- {title} ({channel}) (https://youtube.com/watch?v={vid_id})\n  description: {description}"
-        )
-
-        top_videos_list.append(
-            VideoItem(
-                video_id=vid_id, title=title, channel=channel, description=description
-            )
         )
 
     context_text = "\n".join(context_lines)
@@ -67,24 +59,25 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
                 "role": "system",
                 "content": (
                     "You are a helpful assistant that answers questions using YouTube video metadata. "
-                    "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of **relevant** 'top_videos'."
-                    """- `answer_text` MUST be very short and concise and in natural language. (max 1–2 sentences).\n
-- The detailed data will be shown separately in a table using `top_videos`.\n
-- Avoid repeating the same rows/columns in text."""
+                    "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of **only the most relevant** 'top_videos'.\n"
+                    "- `answer_text` MUST be very short and concise in natural language (max 1–2 sentences).\n"
+                    "- Use `top_videos` to include only the 2–3 most relevant items from context.\n"
+                    "- Do not include all items unless all are clearly relevant.\n"
                 ),
             },
             {
                 "role": "user",
-                "content": f"Question: {query}\n\nRelevant videos:\n{context_text}\n\nAnswer based only on this.",
+                "content": f"Question: {query}\n\nCandidate videos:\n{context_text}\n\nPick only the relevant ones.",
             },
         ],
         response_format=LLMAnswer,
     )
 
-    llm_answer = response.choices[0].message.parsed  # already LLMAnswer object
+    llm_answer = response.choices[0].message.parsed
     answer_text = llm_answer.answer_text
     video_html = build_video_html(llm_answer.top_videos)
     return answer_text, video_html
+
 
 
 def build_video_html(videos: list[VideoItem]) -> str:
