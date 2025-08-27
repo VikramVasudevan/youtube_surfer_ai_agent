@@ -1,0 +1,13 @@
+[project]
+name = "youtube-surfer-ai-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=1.0.20",
+    "dotenv>=0.9.9",
+    "google-api-python-client>=2.179.0",
+    "gradio>=5.44.0",
+    "openai>=1.102.0",
+]
