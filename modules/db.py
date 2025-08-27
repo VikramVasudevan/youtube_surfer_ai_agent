@@ -1,7 +1,13 @@
 import chromadb
 
-def get_collection():
+
+def get_client():
     client = chromadb.PersistentClient(path="./youtube_db")
+    return client
+
+
+def get_collection():
+    client = get_client()
 
     # Ensure fresh collection with correct dimension
     try:
@@ -34,3 +40,16 @@ def get_indexed_channels(collection):
             channels[cid] = cname
 
     return channels
+
+
+# -------------------------------
+# Delete a channel
+# -------------------------------
+def delete_channel_from_collection(channel_id: str):
+    """Remove a channel from the index and refresh the radio choices."""
+    # Delete all videos for this channel
+    print("Deleting channel", channel_id)
+    data = get_collection().get(where={"channel_id": channel_id})
+    print("data = ", data)
+    get_collection().delete(where={"channel_id": channel_id})
+    collection = get_collection()
