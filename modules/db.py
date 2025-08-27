@@ -38,7 +38,7 @@ def get_indexed_channels(collection):
 
         if cid:  # only include if we have a channel_id
             channels[cid] = cname
-
+    print("channels= ",channels)
     return channels
 
 

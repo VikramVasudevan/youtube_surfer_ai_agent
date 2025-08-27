@@ -104,13 +104,14 @@ def list_channels_radio():
     choices = []
     for key, val in channels.items():
         if isinstance(val, dict):
-            cname = val.get("channel_title", "Unknown")
-            curl = val.get("channel_url")
+            channel_display_name = val.get("channel_title", "Unknown")
+            channel_id = val.get("channel_url")
         else:
-            cname = val
-            curl = key
-        if curl:
-            choices.append((cname, curl))
+            channel_display_name = val
+            channel_id = key
+        if channel_id:
+            choices.append((channel_display_name, channel_id))
+    print("choices= ",choices)
     return choices
 
 
@@ -206,7 +207,7 @@ with gr.Blocks() as demo:
         # Sidebar
         with gr.Sidebar() as my_sidebar:
             gr.Markdown("### 📺 Channels")
-            channel_list_state = gr.State([c[0] for c in list_channels_radio()])
+            channel_list_state = gr.State([c for c in list_channels_radio()])
 
             no_channels_message = gr.Markdown(
                 "⚠️ **No channels available.**",
@@ -351,11 +352,9 @@ with gr.Blocks() as demo:
             )
 
             # Show videos modal when button clicked
-            def show_selected_channel_videos(selected_channel_name):
-                for cname, curl in list_channels_radio():
-                    if cname == selected_channel_name:
-                        return fetch_channel_html(curl)
-                return "<p>No videos found.</p>"
+            def show_selected_channel_videos(selected_channel_id):
+                print("selected_channel_id = ", selected_channel_id)
+                return fetch_channel_html(selected_channel_id)
 
             channel_radio.change(
                 enable_if_not_none, inputs=[channel_radio], outputs=[show_videos_btn]
