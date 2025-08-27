@@ -67,7 +67,7 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
                 "role": "system",
                 "content": (
                     "You are a helpful assistant that answers questions using YouTube video metadata. "
-                    "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of 'top_videos'."
+                    "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of **relevant** 'top_videos'."
                     """- `answer_text` MUST be very short and concise and in natural language. (max 1–2 sentences).\n
 - The detailed data will be shown separately in a table using `top_videos`.\n
 - Avoid repeating the same rows/columns in text."""
