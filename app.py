@@ -162,7 +162,7 @@ def handle_query(query: str):
 # Gradio UI
 # -------------------------------
 with gr.Blocks() as demo:
-    gr.Markdown("## 📺 YouTube Metadata Q&A Agent")
+    gr.Markdown("### 📺 YouTube Channel Surfer")
 
     # Modal to show channel videos
     with Modal(visible=False) as videos_list_modal:
