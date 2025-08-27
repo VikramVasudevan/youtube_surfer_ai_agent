@@ -20,3 +20,17 @@ def get_collection():
 
     return collection
 
+
+# modules/db.py
+def get_indexed_channels(collection):
+    results = collection.get(include=["metadatas"])
+    channels = {}
+
+    for meta in results["metadatas"]:
+        cid = meta.get("channel_id")  # ✅ safe
+        cname = meta.get("channel_title", "Unknown Channel")
+
+        if cid:  # only include if we have a channel_id
+            channels[cid] = cname
+
+    return channels
