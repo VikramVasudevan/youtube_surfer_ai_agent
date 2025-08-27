@@ -325,6 +325,7 @@ with gr.Blocks() as demo:
                     "Slokas that mention gajendra moksham",
                     "Poorvikalyani Raga Alapana",
                     "Virutham from chathusloki",
+                    "Lesson 9.15 from Aksharam"
                 ],
                 inputs=question,
             )
