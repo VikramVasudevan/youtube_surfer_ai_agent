@@ -181,13 +181,13 @@ with gr.Blocks() as demo:
         def set_example(label):
             return examples[label]
 
+        gr.Markdown("Click on any example below and then click on add channels button.")
         with gr.Row():
             for label in examples:
-                gr.Button(label).click(
+                gr.Button(label, size="sm", variant="secondary").click(
                     fn=set_example,
                     inputs=gr.State(label),
                     outputs=channel_input,
-                    size="sm",
                 )
 
         with gr.Row():
