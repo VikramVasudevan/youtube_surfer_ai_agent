@@ -229,10 +229,21 @@ with gr.Blocks() as demo:
 
         # Main Column
         with gr.Column(scale=3):
-            question = gr.Textbox(
-                label="Ask a Question",
-                placeholder="e.g., What topics did they cover on AI ethics?",
-            )
+            with gr.Row():
+                question = gr.Textbox(
+                    label="Ask a Question",
+                    placeholder="e.g., What topics did they cover on AI ethics?",
+                )
+                with gr.Column():
+                    ask_btn = gr.Button(
+                        "💡 Get Answer",
+                        size="sm",
+                        scale=0,
+                        variant="primary",
+                        interactive=False,
+                    )
+                    ask_status = gr.Markdown()
+
             gr.Examples(
                 [
                     "Show me some videos that mention Ranganatha.",
@@ -243,19 +254,6 @@ with gr.Blocks() as demo:
 
             answer = gr.Markdown()
             video_embed = gr.HTML()  # iframe embeds
-
-            with gr.Row():
-                gr.Column()
-                ask_btn = gr.Button(
-                    "💡 Get Answer",
-                    size="sm",
-                    scale=0,
-                    variant="primary",
-                    interactive=False,
-                )
-
-                ask_status = gr.Markdown()
-                gr.Column()
 
             ask_btn.click(show_loading, outputs=[ask_status]).then(
                 disable_component, outputs=[ask_btn]
