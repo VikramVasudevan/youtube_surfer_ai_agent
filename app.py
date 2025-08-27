@@ -111,7 +111,7 @@ def list_channels_radio():
             channel_id = key
         if channel_id:
             choices.append((channel_display_name, channel_id))
-    print("choices= ",choices)
+    print("choices= ", choices)
     return choices
 
 
@@ -181,6 +181,11 @@ with gr.Blocks() as demo:
             "One Day One Pasuram": "https://www.youtube.com/@onedayonepasuram6126",
             "Sri Sookthi": "https://www.youtube.com/@srisookthi",
             "Aksharam": "https://www.youtube.com/@learn-aksharam",
+            "Cricinfo": "https://www.youtube.com/@espncricinfo",
+            "Chanakyaa": "https://www.youtube.com/@ChanakyaaTV",
+            "Aptitude Guru": "https://www.youtube.com/@AptitudeGuruHem",
+            "Universe Genius": "https://www.youtube.com/@UniverseGenius",
+            "Praveen Mohan": "https://www.youtube.com/@RealPraveenMohan",
         }
 
         def set_example(label):
@@ -189,7 +194,7 @@ with gr.Blocks() as demo:
         gr.Markdown("Click on any example below and then click on add channels button.")
         with gr.Row():
             for label in examples:
-                gr.Button(label, size="sm", variant="secondary").click(
+                gr.Button(label, size="sm", variant="huggingface", scale=0).click(
                     fn=set_example,
                     inputs=gr.State(label),
                     outputs=channel_input,
@@ -326,7 +331,7 @@ with gr.Blocks() as demo:
                     "Slokas that mention gajendra moksham",
                     "Poorvikalyani Raga Alapana",
                     "Virutham from chathusloki",
-                    "Lesson 9.15 from Aksharam"
+                    "Lesson 9.15 from Aksharam",
                 ],
                 inputs=question,
             )
@@ -381,10 +386,10 @@ with gr.Blocks() as demo:
                 enable_component, outputs=[delete_channel_btn]
             )
         channel_list_state.change(
-                toggle_no_data_found,
-                inputs=[channel_list_state],
-                outputs=[main_content, main_content_no_channels_html],
-            )
+            toggle_no_data_found,
+            inputs=[channel_list_state],
+            outputs=[main_content, main_content_no_channels_html],
+        )
 
 
 def init():
