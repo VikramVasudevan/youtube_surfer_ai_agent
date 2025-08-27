@@ -88,19 +88,26 @@ def build_video_html(videos: list[VideoItem]) -> str:
     html = """
     <table border="1" style="border-collapse: collapse; width: 100%;">
         <tr>
-            <th>Title</th>
-            <th>Channel</th>
             <th>Description</th>
             <th>Watch</th>
         </tr>
     """
     for v in videos:
+        embed_html = f"""
+        <div style="margin-bottom: 20px;">
+            <strong>{v.title}</strong> ({v.channel})<br>
+            <iframe width="360" height="203"
+                src="https://www.youtube.com/embed/{v.video_id}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+        """        
         html += f"""
         <tr>
-            <td>{v.title}</td>
-            <td>{v.channel}</td>
             <td>{v.description}</td>
-            <td><a href="https://youtube.com/watch?v={v.video_id}" target="_blank">▶️ Watch</a></td>
+            <td>{embed_html}</td>
         </tr>
         """
     html += "</table>"
