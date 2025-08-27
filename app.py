@@ -290,6 +290,8 @@ with gr.Blocks() as demo:
                 [
                     "Show me some videos that mention Ranganatha.",
                     "Slokas that mention gajendra moksham",
+                    "Poorvikalyani Raga Alapana",
+                    "Virutham from chathusloki"
                 ],
                 inputs=question,
             )
