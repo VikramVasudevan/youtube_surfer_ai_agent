@@ -10,7 +10,7 @@ import chromadb
 from dotenv import load_dotenv
 
 from modules.answerer import answer_query
-from modules.collector import fetch_channel_videos
+from modules.collector import fetch_channel_videos_by_id
 from modules.db import get_collection
 from modules.indexer import index_videos
 
@@ -26,7 +26,7 @@ def main():
 
     # Collect + Index
     for ch in CHANNELS:
-        videos = fetch_channel_videos(YT_API_KEY, ch)
+        videos = fetch_channel_videos_by_id(YT_API_KEY, ch)
         index_videos(videos, collection)
 
     # Ask a question

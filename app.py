@@ -3,7 +3,7 @@ import re
 import gradio as gr
 from gradio_modal import Modal
 import chromadb
-from modules.collector import fetch_channel_videos_from_url
+from modules.collector import fetch_all_channel_videos
 from modules.db import (
     delete_channel_from_collection,
     get_collection,
@@ -62,11 +62,23 @@ def enable_if_not_none(question):
 # Fetch & index channels
 # -------------------------------
 def refresh_channel(api_key, channel_url: str):
-    videos = fetch_channel_videos_from_url(api_key, channel_url)
-    for v in videos:
-        v["channel_url"] = channel_url
-    index_videos(videos, get_collection(), channel_url=channel_url)
-    return len(videos)
+    all_videos = []
+    for status, videos_batch in fetch_all_channel_videos(api_key, channel_url):
+        # enrich each video in the batch with channel_url
+        for v in videos_batch:
+            v["channel_url"] = channel_url
+        all_videos.extend(videos_batch)
+
+        # (optional) log progress
+        print(status, "- total so far:", len(all_videos))
+
+    # index all at once
+    if all_videos:
+        print(f"Adding {len(all_videos)} videos to database")
+        index_videos(all_videos, get_collection(), channel_url=channel_url)
+        print(f"Loaded {len(all_videos)} videos")
+
+    return len(all_videos)
 
 
 def index_channels(channel_urls: str):
@@ -111,31 +123,59 @@ def list_channels_radio():
             channel_id = key
         if channel_id:
             choices.append((channel_display_name, channel_id))
-    print("choices= ", choices)
+    # print("choices= ", choices)
     return choices
 
 
 # -------------------------------
 # Fetch channel videos as HTML table
 # -------------------------------
-def fetch_channel_html(channel_url: str):
-    api_key = os.environ["YOUTUBE_API_KEY"]
-    videos = fetch_channel_videos_from_url(api_key, channel_url, max_results=50)
-    if not videos:
-        return "<p>No videos found.</p>"
-    html = "<table border='1' style='border-collapse: collapse; width:100%'>"
-    html += "<tr><th>#<th>Title</th><th>Video URL</th><th>Description</th></tr>"
+def fetch_channel_html(channel_id: str):
+    # query your collection/db instead of YouTube API
+    collection = get_collection()
+    results = collection.get(
+        where={"channel_id": channel_id},
+        include=["documents", "metadatas"]
+    )
+
+    if not results or not results.get("metadatas"):
+        return """
+        <div style="display:flex;justify-content:center;align-items:center;
+                    height:200px;flex-direction:column;color:#666;">
+            ⚠️ No videos found for this channel.
+        </div>
+        """
+
+    videos = results["metadatas"]
+
+    # build table
+    html = """
+    <table border="1" style="border-collapse:collapse;width:100%;font-family:sans-serif;">
+        <thead style="background:#f0f0f0;">
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Video URL</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
     for idx, v in enumerate(videos):
-        html += "<tr>"
-        html += f"<td>{idx+1}</td>"
-        html += f"<td>{v['title']}</td>"
-        html += f"<td><a href='https://youtube.com/watch?v={v['video_id']}' target='_blank'>Watch Video</a></td>"
-        html += f"<td>{v.get('description','')}</td>"
-        html += "</tr>"
-    html += "</table>"
+        html += f"""
+        <tr>
+            <td>{idx+1}</td>
+            <td>{v.get('video_title','')}</td>
+            <td><a href="https://youtube.com/watch?v={v.get('video_id')}" 
+                   target="_blank">Watch Video</a></td>
+            <td>{v.get('description','')}</td>
+        </tr>
+        """
+
+    html += "</tbody></table>"
     return html
 
-    get_collection  # -------------------------------
 
 
 # Delete a channel
@@ -203,7 +243,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             gr.Column()
             save_add_channels_btn = gr.Button(
-                "Add Channels", scale=0, variant="primary"
+                "Add Channel(s)", scale=0, variant="primary"
             )
             gr.Column()
         index_status = gr.Markdown(label="Index Status", container=False)
@@ -358,7 +398,7 @@ with gr.Blocks() as demo:
 
             # Show videos modal when button clicked
             def show_selected_channel_videos(selected_channel_id):
-                print("selected_channel_id = ", selected_channel_id)
+                # print("selected_channel_id = ", selected_channel_id)
                 return fetch_channel_html(selected_channel_id)
 
             channel_radio.change(
@@ -395,7 +435,8 @@ with gr.Blocks() as demo:
 def init():
     channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam"
     for resp in index_channels(channels):
-        print(resp)
+        # print(resp)
+        pass
 
 
 if __name__ == "__main__":

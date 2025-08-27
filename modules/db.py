@@ -38,7 +38,7 @@ def get_indexed_channels(collection):
 
         if cid:  # only include if we have a channel_id
             channels[cid] = cname
-    print("channels= ",channels)
+    # print("channels= ",channels)
     return channels
 
 
@@ -48,8 +48,8 @@ def get_indexed_channels(collection):
 def delete_channel_from_collection(channel_id: str):
     """Remove a channel from the index and refresh the radio choices."""
     # Delete all videos for this channel
-    print("Deleting channel", channel_id)
+    # print("Deleting channel", channel_id)
     data = get_collection().get(where={"channel_id": channel_id})
-    print("data = ", data)
+    # print("data = ", data)
     get_collection().delete(where={"channel_id": channel_id})
     collection = get_collection()
