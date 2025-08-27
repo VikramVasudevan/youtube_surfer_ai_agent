@@ -70,13 +70,13 @@ def refresh_channel(api_key, channel_url: str):
 
 
 def index_channels(channel_urls: str):
-    yield "saving ...", gr.update()
+    yield "saving ...", gr.update(), gr.update()
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
     urls = [u.strip() for u in re.split(r"[\n,]+", channel_urls) if u.strip()]
     total_videos = sum(refresh_channel(yt_api_key, url) for url in urls)
     yield f"✅ Indexed {total_videos} videos from {len(urls)} channels.", gr.update(
         choices=list_channels_radio()
-    )
+    ), list_channels_radio()
     return
 
 
@@ -202,9 +202,16 @@ with gr.Blocks() as demo:
         # Sidebar
         with gr.Sidebar() as my_sidebar:
             gr.Markdown("### 📺 Channels")
+            channel_list_state = gr.State([c[0] for c in list_channels_radio()])
 
+            no_channels_message = gr.Markdown(
+                "⚠️ **No channels available.**",
+                visible=False if channel_list_state.value else True,
+            )
             channel_radio = gr.Radio(
-                choices=[c[0] for c in list_channels_radio()], label="Select a Channel"
+                choices=channel_list_state.value,
+                label="Select a Channel",
+                visible=True if channel_list_state.value else False,
             )
 
             with gr.Row():
@@ -238,18 +245,28 @@ with gr.Blocks() as demo:
                 show_component, outputs=[add_channel_modal]
             )
 
+            def toggle_no_data_found(channel_list):
+                if channel_list:
+                    return show_component(), hide_component()
+                else:
+                    return hide_component(), show_component()
+
             save_add_channels_btn.click(
                 disable_component, outputs=[save_add_channels_btn]
             ).then(
                 index_channels,
                 inputs=[channel_input],
-                outputs=[index_status, channel_radio],
+                outputs=[index_status, channel_radio, channel_list_state],
             ).then(
                 hide_component, outputs=[add_channel_modal]
             ).then(
                 open_component, outputs=[my_sidebar]
             ).then(
                 enable_component, outputs=[save_add_channels_btn]
+            ).then(
+                toggle_no_data_found,
+                inputs=[channel_list_state],
+                outputs=[channel_radio, no_channels_message],
             )
 
         # Main Column
