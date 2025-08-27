@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 from modules.retriever import retrieve_videos
 
+
 # -------------------------------
 # Structured Output Classes
 # -------------------------------
@@ -15,9 +16,11 @@ class VideoItem(BaseModel):
     channel: str
     description: str
 
+
 class LLMAnswer(BaseModel):
     answer_text: str
     top_videos: List[VideoItem]
+
 
 # -------------------------------
 # Main Function
@@ -43,14 +46,13 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
         title = r.get("video_title") or r.get("title", "")
         channel = r.get("channel") or r.get("channel_title", "")
         description = r.get("description", "")
-        context_lines.append(f"- {title} ({channel}) (https://youtube.com/watch?v={vid_id})\n  description: {description}")
+        context_lines.append(
+            f"- {title} ({channel}) (https://youtube.com/watch?v={vid_id})\n  description: {description}"
+        )
 
         top_videos_list.append(
             VideoItem(
-                video_id=vid_id,
-                title=title,
-                channel=channel,
-                description=description
+                video_id=vid_id, title=title, channel=channel, description=description
             )
         )
 
@@ -66,14 +68,17 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
                 "content": (
                     "You are a helpful assistant that answers questions using YouTube video metadata. "
                     "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of 'top_videos'."
-                )
+                    """- `answer_text` MUST be very short and concise and in natural language. (max 1–2 sentences).\n
+- The detailed data will be shown separately in a table using `top_videos`.\n
+- Avoid repeating the same rows/columns in text."""
+                ),
             },
             {
                 "role": "user",
-                "content": f"Question: {query}\n\nRelevant videos:\n{context_text}\n\nAnswer based only on this."
-            }
+                "content": f"Question: {query}\n\nRelevant videos:\n{context_text}\n\nAnswer based only on this.",
+            },
         ],
-        response_format=LLMAnswer
+        response_format=LLMAnswer,
     )
 
     llm_answer = response.choices[0].message.parsed  # already LLMAnswer object
