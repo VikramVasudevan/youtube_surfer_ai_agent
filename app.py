@@ -53,6 +53,13 @@ def show_loading():
     return gr.update(value="⏳Fetching ...")
 
 
+def enable_if_not_none(question):
+    if question is None:
+        return disable_component()
+    else:
+        return enable_component()
+
+
 # -------------------------------
 # Fetch & index channels
 # -------------------------------
@@ -103,7 +110,7 @@ def list_channels_radio():
             cname = val
             curl = key
         if curl:
-            choices.append((cname, curl ))
+            choices.append((cname, curl))
     return choices
 
 
@@ -177,16 +184,21 @@ with gr.Blocks() as demo:
 
             with gr.Row():
                 show_videos_btn = gr.Button(
-                    "Videos", size="sm", scale=0, variant="secondary"
+                    "🎬Videos",
+                    size="sm",
+                    scale=0,
+                    variant="secondary",
+                    interactive=False,
                 )
                 refresh_all_btn = gr.Button(
-                    "🔄 Refresh", size="sm", scale=0, variant="huggingface"
+                    "🔄Refresh", size="sm", scale=0, variant="huggingface"
                 )
                 add_channels_btn = gr.Button(
-                    "+ Add", size="sm", scale=0, variant="primary"
+                    "➕ Add", size="sm", scale=0, variant="primary"
                 )
+
                 delete_channel_btn = gr.Button(
-                    "Delete", size="sm", scale=0, variant="stop", visible=False
+                    "🗑️ Delete", size="sm", scale=0, variant="stop", visible=False
                 )
 
             refresh_status = gr.Markdown(label="Refresh Status", container=False)
@@ -234,11 +246,27 @@ with gr.Blocks() as demo:
 
             with gr.Row():
                 gr.Column()
-                ask_btn = gr.Button("Get Answer", variant="primary", scale=0)
+                ask_btn = gr.Button(
+                    "💡 Get Answer",
+                    size="sm",
+                    scale=0,
+                    variant="primary",
+                    interactive=False,
+                )
+
                 ask_status = gr.Markdown()
                 gr.Column()
 
             ask_btn.click(show_loading, outputs=[ask_status]).then(
+                disable_component, outputs=[ask_btn]
+            ).then(handle_query, inputs=[question], outputs=[answer, video_embed]).then(
+                enable_component, outputs=[ask_btn]
+            ).then(
+                clear_component, outputs=[ask_status]
+            )
+
+            question.change(enable_if_not_none, inputs=[question], outputs=[ask_btn])
+            question.submit(show_loading, outputs=[ask_status]).then(
                 disable_component, outputs=[ask_btn]
             ).then(handle_query, inputs=[question], outputs=[answer, video_embed]).then(
                 enable_component, outputs=[ask_btn]
@@ -253,6 +281,9 @@ with gr.Blocks() as demo:
                         return fetch_channel_html(curl)
                 return "<p>No videos found.</p>"
 
+            channel_radio.change(
+                enable_if_not_none, inputs=[channel_radio], outputs=[show_videos_btn]
+            )
             show_videos_btn.click(disable_component, outputs=[show_videos_btn]).then(
                 close_component, outputs=[my_sidebar]
             ).then(
