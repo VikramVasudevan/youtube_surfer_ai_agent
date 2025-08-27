@@ -74,7 +74,9 @@ def index_channels(channel_urls: str):
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
     urls = [u.strip() for u in re.split(r"[\n,]+", channel_urls) if u.strip()]
     total_videos = sum(refresh_channel(yt_api_key, url) for url in urls)
-    yield f"✅ Indexed {total_videos} videos from {len(urls)} channels.", gr.update(choices=list_channels_radio())
+    yield f"✅ Indexed {total_videos} videos from {len(urls)} channels.", gr.update(
+        choices=list_channels_radio()
+    )
     return
 
 
@@ -168,7 +170,32 @@ with gr.Blocks() as demo:
             label="Channel URLs",
             placeholder="Paste one or more YouTube channel URLs (comma or newline separated)",
         )
-        save_add_channels_btn = gr.Button("Add Channels")
+        examples = {
+            "Comma Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam",
+            "Newline Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126\nhttps://www.youtube.com/@srisookthi\nhttps://www.youtube.com/@learn-aksharam",
+            "One Day One Pasuram": "https://www.youtube.com/@onedayonepasuram6126",
+            "Sri Sookthi": "https://www.youtube.com/@srisookthi",
+            "Aksharam": "https://www.youtube.com/@learn-aksharam",
+        }
+
+        def set_example(label):
+            return examples[label]
+
+        with gr.Row():
+            for label in examples:
+                gr.Button(label).click(
+                    fn=set_example,
+                    inputs=gr.State(label),
+                    outputs=channel_input,
+                    size="sm",
+                )
+
+        with gr.Row():
+            gr.Column()
+            save_add_channels_btn = gr.Button(
+                "Add Channels", scale=0, variant="primary"
+            )
+            gr.Column()
         index_status = gr.Markdown(label="Index Status", container=False)
 
     with gr.Row():
@@ -302,10 +329,12 @@ with gr.Blocks() as demo:
                 enable_component, outputs=[delete_channel_btn]
             )
 
+
 def init():
     channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam"
     for resp in index_channels(channels):
         print(resp)
+
 
 if __name__ == "__main__":
     # init()
