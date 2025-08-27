@@ -70,13 +70,13 @@ def refresh_channel(api_key, channel_url: str):
         all_videos.extend(videos_batch)
 
         # (optional) log progress
-        print(status, "- total so far:", len(all_videos))
+        print(channel_url, status, "- total so far:", len(all_videos))
 
     # index all at once
     if all_videos:
-        print(f"Adding {len(all_videos)} videos to database")
+        print(f"{channel_url} - Adding {len(all_videos)} videos to database")
         index_videos(all_videos, get_collection(), channel_url=channel_url)
-        print(f"Loaded {len(all_videos)} videos")
+        print(f"{channel_url} - Loaded {len(all_videos)} videos to database")
 
     return len(all_videos)
 
