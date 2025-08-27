@@ -524,6 +524,18 @@ wheels = [
 ]
 
 [[package]]
+name = "gradio-modal"
+version = "0.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "gradio" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/fd/3b383f9ee8d60625e9e26871ba4adcacbedeab132041b94290758e02e543/gradio_modal-0.0.4.tar.gz", hash = "sha256:717ae699072a171648cfa1b84bc153be84e92d04e9ad58c1bc59af68ef332726", size = 1180812, upload-time = "2024-10-15T23:46:06.134Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/05/3d/76f454de84ae1dccbf2b7023e933afb8dde5fdd89e9476786726ef770737/gradio_modal-0.0.4-py3-none-any.whl", hash = "sha256:d96e817d2e934d9e1b835b06474f45fd349b5ccea499d1536bfb4bd38f62dedb", size = 1106241, upload-time = "2024-10-15T23:46:04.13Z" },
+]
+
+[[package]]
 name = "groovy"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2009,6 +2021,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "google-api-python-client" },
     { name = "gradio" },
+    { name = "gradio-modal" },
     { name = "openai" },
 ]
 
@@ -2018,6 +2031,7 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "google-api-python-client", specifier = ">=2.179.0" },
     { name = "gradio", specifier = ">=5.44.0" },
+    { name = "gradio-modal", specifier = ">=0.0.4" },
     { name = "openai", specifier = ">=1.102.0" },
 ]
 

@@ -9,5 +9,6 @@ dependencies = [
     "dotenv>=0.9.9",
     "google-api-python-client>=2.179.0",
     "gradio>=5.44.0",
+    "gradio-modal>=0.0.4",
     "openai>=1.102.0",
 ]
