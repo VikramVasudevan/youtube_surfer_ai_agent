@@ -20,4 +20,7 @@ def get_channel_id(youtube, channel_url: str) -> str:
         response = request.execute()
         return response["items"][0]["id"]
 
-    raise ValueError("Unsupported channel URL format")
+    if channel_url.startswith("UC"):
+        return channel_url
+
+    raise ValueError(f"Unsupported channel URL format {channel_url}")

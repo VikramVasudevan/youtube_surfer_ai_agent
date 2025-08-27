@@ -136,7 +136,7 @@ with gr.Blocks() as demo:
                 placeholder="e.g., What topics did they cover on AI ethics?"
             )
             gr.Examples(
-                ["Show me some videos that mention Ranganatha."],
+                ["Show me some videos that mention Ranganatha.","Slokas that mention gajendra moksham"],
                 inputs=question
             )
             answer = gr.Markdown()

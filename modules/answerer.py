@@ -11,7 +11,7 @@ def answer_query(query: str, collection):
     if not results or len(results) == 0:
         return "No relevant videos found."
 
-    print("results = ", json.dumps(results, indent=1))
+    # print("results = ", json.dumps(results, indent=1))
 
     # Chroma returns a list of query results
     top_result = results
@@ -26,7 +26,8 @@ def answer_query(query: str, collection):
     for doc, meta in zip(docs, metas):
         vid_id = meta.get("video_id", "")
         title = meta.get("video_title", doc)
-        context_lines.append(f"- {title} (https://youtube.com/watch?v={vid_id})")
+        description = doc
+        context_lines.append(f"- {title} (https://youtube.com/watch?v={vid_id}) \n description: {description}")
 
     context = "\n".join(context_lines)
 
