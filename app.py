@@ -150,6 +150,10 @@ def delete_channel(channel_url: str):
 # -------------------------------
 def handle_query(query: str):
     answer_text, video_html = answer_query(query, get_collection())
+    if not answer_text:
+        answer_text = "No answer available."
+    if not video_html or not isinstance(video_html, str):
+        video_html = ""  # ensure string for gr.HTML
     return answer_text, video_html
 
 
