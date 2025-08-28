@@ -24,6 +24,10 @@ load_dotenv()
 # -------------------------------
 # Utility functions
 # -------------------------------
+def refresh_channel_list():
+    return gr.update(choices=list_channels_radio())
+
+
 def show_component():
     return gr.update(visible=True)
 
@@ -52,8 +56,8 @@ def clear_component():
     return gr.update(value="")
 
 
-def show_loading():
-    return gr.update(value="⏳Fetching ...")
+def show_loading(question):
+    return gr.update(value=f"⏳Fetching details on [{question}]...")
 
 
 def enable_if_not_none(question):
@@ -78,13 +82,14 @@ def index_channels(channel_urls: str):
     # final UI update
     yield (
         f"✅ Indexed {total_videos} videos from {len(urls)} channels.",
-        gr.update(choices=list_channels_radio()),
+        refresh_channel_list(),
         list_channels_radio(),
     )
 
+
 def init(progress: gr.Progress = None):
     channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam,https://www.youtube.com/@SriYadugiriYathirajaMutt,https://www.youtube.com/@akivasudev"
-    for (msg,upd,upd) in index_channels(channels):
+    for msg, upd, upd in index_channels(channels):
         # print(resp)
         yield msg
 
@@ -94,7 +99,7 @@ def refresh_all_channels():
     channels = get_indexed_channels(get_collection())
 
     if not channels:
-        return "⚠️ No channels available to refresh.", list_channels_radio()
+        return "⚠️ No channels available to refresh.", refresh_channel_list()
 
     # build list of URLs
     urls = []
@@ -108,7 +113,7 @@ def refresh_all_channels():
 
     return (
         f"🔄 Refreshed {len(urls)} channels, re-indexed {total_videos} videos.",
-        list_channels_radio(),
+        refresh_channel_list(),
     )
 
 
@@ -201,7 +206,7 @@ def fetch_channel_html(channel_id: str, page: int = 1, page_size: int = 10):
 def delete_channel(channel_url: str):
     delete_channel_from_collection(channel_url)
     # Return updated radio choices
-    return gr.update(choices=list_channels_radio())
+    return refresh_channel_list()
 
 
 # -------------------------------
@@ -361,9 +366,6 @@ with gr.Blocks() as demo:
                 outputs=[refresh_status, channel_radio],
             )
 
-            def refresh_channel_list():
-                return gr.update(choices=list_channels_radio())
-
             refresh_btn.click(fn=refresh_channel_list, outputs=[channel_radio]).then(
                 fn=list_channels_radio, outputs=[channel_list_state]
             )
@@ -437,16 +439,9 @@ with gr.Blocks() as demo:
                 question = gr.Textbox(
                     label="Ask a Question",
                     placeholder="e.g., What topics did they cover on AI ethics?",
+                    submit_btn=True,
                 )
-                with gr.Column():
-                    ask_btn = gr.Button(
-                        "💡 Get Answer",
-                        size="sm",
-                        scale=0,
-                        variant="primary",
-                        interactive=False,
-                    )
-                    ask_status = gr.Markdown()
+                gr.Column(scale=2)
 
             gr.Examples(
                 [
@@ -459,30 +454,23 @@ with gr.Blocks() as demo:
                 inputs=question,
             )
 
+            submitted_question = gr.Markdown()
+            ask_status = gr.Markdown()            
             answer = gr.Markdown()
             video_embed = gr.HTML()  # iframe embeds
 
-            ask_btn.click(show_loading, outputs=[ask_status]).then(
-                disable_component, outputs=[ask_btn]
-            ).then(
-                handle_query,
-                inputs=[question, search_channel],
-                outputs=[answer, video_embed],
-            ).then(
-                enable_component, outputs=[ask_btn]
-            ).then(
-                clear_component, outputs=[ask_status]
-            )
+            def get_question(q):
+                return f"## You asked : {q}\n---"
 
-            question.change(enable_if_not_none, inputs=[question], outputs=[ask_btn])
-            question.submit(show_loading, outputs=[ask_status]).then(
-                disable_component, outputs=[ask_btn]
-            ).then(
+            # question.change(enable_if_not_none, inputs=[question], outputs=[question])
+            question.submit(show_loading, inputs=[question], outputs=[ask_status]).then(
+                get_question, inputs=[question], outputs=[submitted_question]
+            ).then(disable_component, outputs=[question]).then(
                 handle_query,
                 inputs=[question, search_channel],
                 outputs=[answer, video_embed],
             ).then(
-                enable_component, outputs=[ask_btn]
+                enable_component, outputs=[question]
             ).then(
                 clear_component, outputs=[ask_status]
             )

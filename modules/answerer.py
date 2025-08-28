@@ -76,7 +76,7 @@ def answer_query(
     )
 
     llm_answer = response.choices[0].message.parsed
-    answer_text = llm_answer.answer_text
+    answer_text = "\n## Answer : \n" + llm_answer.answer_text
     video_html = build_video_html(llm_answer.top_videos)
     return answer_text, video_html
 
