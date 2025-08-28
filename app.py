@@ -265,8 +265,8 @@ with gr.Blocks() as demo:
             placeholder="Paste one or more YouTube channel URLs (comma or newline separated)",
         )
         examples = {
-            "Comma Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam",
-            "Newline Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126\nhttps://www.youtube.com/@srisookthi\nhttps://www.youtube.com/@learn-aksharam",
+            "Comma Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam,https://www.youtube.com/@SriYadugiriYathirajaMutt",
+            "Newline Separated Channels Example": "https://www.youtube.com/@onedayonepasuram6126\nhttps://www.youtube.com/@srisookthi\nhttps://www.youtube.com/@learn-aksharam\nhttps://www.youtube.com/@SriYadugiriYathirajaMutt",
             "One Day One Pasuram": "https://www.youtube.com/@onedayonepasuram6126",
             "Sri Sookthi": "https://www.youtube.com/@srisookthi",
             "Aksharam": "https://www.youtube.com/@learn-aksharam",
@@ -275,6 +275,7 @@ with gr.Blocks() as demo:
             "Aptitude Guru": "https://www.youtube.com/@AptitudeGuruHem",
             "Universe Genius": "https://www.youtube.com/@UniverseGenius",
             "Praveen Mohan": "https://www.youtube.com/@RealPraveenMohan",
+            "Yathiraja Mutt" : "https://www.youtube.com/@SriYadugiriYathirajaMutt"
         }
 
         def set_example(label):
