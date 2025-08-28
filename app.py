@@ -325,14 +325,12 @@ with gr.Blocks() as demo:
                     size="sm",
                     scale=0,
                     variant="huggingface",
-                    visible=False,
                 )
                 refresh_all_btn = gr.Button(
-                    "🔄Refresh",
+                    "Sync",
                     size="sm",
                     scale=0,
                     variant="huggingface",
-                    visible=False,
                 )
                 add_channels_btn = gr.Button(
                     "➕ Add", size="sm", scale=0, variant="primary"
@@ -350,7 +348,10 @@ with gr.Blocks() as demo:
                 outputs=[refresh_status, channel_radio],
             )
 
-            refresh_btn.click(fn=list_channels_radio, outputs=[channel_radio])
+            def refresh_channel_list():
+                return gr.update(choices=list_channels_radio())
+
+            refresh_btn.click(fn=refresh_channel_list, outputs=[channel_radio]).then(fn=list_channels_radio, outputs=[channel_list_state])
             add_channels_btn.click(close_component, outputs=[my_sidebar]).then(
                 show_component, outputs=[add_channel_modal]
             )
@@ -378,7 +379,8 @@ with gr.Blocks() as demo:
                 inputs=[channel_list_state],
                 outputs=[channel_radio, no_channels_message],
             )
-
+            ## Onload refresh the channel list.
+            gr.on(fn=refresh_channel_list, outputs=[channel_radio]).then(fn=list_channels_radio, outputs=[channel_list_state])
         # Main Column
         main_content_no_channels_html = gr.HTML(
             """
