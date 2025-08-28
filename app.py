@@ -1,5 +1,7 @@
+import asyncio
 import os
 import re
+import threading
 import gradio as gr
 from gradio_modal import Modal
 import chromadb
@@ -13,6 +15,7 @@ from modules.indexer import index_videos
 from modules.answerer import answer_query, LLMAnswer, VideoItem, build_video_html
 from dotenv import load_dotenv
 
+from youtube_poller import start_poll
 from youtube_sync import sync_channels_from_youtube
 
 load_dotenv()
@@ -545,4 +548,7 @@ with gr.Blocks() as demo:
 if __name__ == "__main__":
     for msg in init():
         print(msg)
+    # Start polling in a background thread
+    poll_thread = threading.Thread(target=start_poll, daemon=True)
+    poll_thread.start()
     demo.launch()

@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "chromadb>=1.0.20",
     "dotenv>=0.9.9",
+    "feedparser>=6.0.11",
     "google-api-python-client>=2.179.0",
     "gradio>=5.44.0",
     "gradio-modal>=0.0.4",

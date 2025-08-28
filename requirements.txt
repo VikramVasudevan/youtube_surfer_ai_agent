@@ -59,6 +59,8 @@ durationpy==0.10
     # via kubernetes
 fastapi==0.116.1
     # via gradio
+feedparser==6.0.11
+    # via youtube-surfer-ai-agent (pyproject.toml)
 ffmpy==0.6.1
     # via gradio
 filelock==3.19.1
@@ -295,6 +297,8 @@ safehttpx==0.1.6
     # via gradio
 semantic-version==2.10.0
     # via gradio
+sgmllib3k==1.0.0
+    # via feedparser
 shellingham==1.5.4
     # via typer
 six==1.17.0

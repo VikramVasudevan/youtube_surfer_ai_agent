@@ -28,7 +28,7 @@ def get_collection():
 
 
 # modules/db.py
-def get_indexed_channels(collection):
+def get_indexed_channels(collection = get_collection()):
     results = collection.get(include=["metadatas"])
     channels = {}
 
