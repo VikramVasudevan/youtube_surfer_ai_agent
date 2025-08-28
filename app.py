@@ -321,16 +321,16 @@ with gr.Blocks() as demo:
                     interactive=False,
                 )
                 refresh_btn = gr.Button(
-                    "🔄Refresh",
+                    "⭮ Refresh",
                     size="sm",
                     scale=0,
                     variant="huggingface",
                 )
                 refresh_all_btn = gr.Button(
-                    "Sync",
+                    "🔄 Sync from YouTube",
                     size="sm",
                     scale=0,
-                    variant="huggingface",
+                    variant="stop",
                 )
                 add_channels_btn = gr.Button(
                     "➕ Add", size="sm", scale=0, variant="primary"
