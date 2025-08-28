@@ -79,6 +79,12 @@ def index_channels(channel_urls: str):
         list_channels_radio(),
     )
 
+def init(progress: gr.Progress = None):
+    channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam,https://www.youtube.com/@SriYadugiriYathirajaMutt,https://www.youtube.com/@akivasudev"
+    for (msg,upd,upd) in index_channels(channels):
+        # print(resp)
+        yield msg
+
 
 def refresh_all_channels():
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
@@ -275,7 +281,8 @@ with gr.Blocks() as demo:
             "Aptitude Guru": "https://www.youtube.com/@AptitudeGuruHem",
             "Universe Genius": "https://www.youtube.com/@UniverseGenius",
             "Praveen Mohan": "https://www.youtube.com/@RealPraveenMohan",
-            "Yathiraja Mutt" : "https://www.youtube.com/@SriYadugiriYathirajaMutt"
+            "Yathiraja Mutt": "https://www.youtube.com/@SriYadugiriYathirajaMutt",
+            "Vasudevan Srinivasachariar": "https://www.youtube.com/@akivasudev",
         }
 
         def set_example(label):
@@ -518,7 +525,10 @@ with gr.Blocks() as demo:
 
         def get_channel_choices(channel_list):
             return gr.update(choices=[("All Channels", None)] + channel_list)
-        channel_list_state.change(get_channel_choices, inputs=[channel_list_state],outputs=[search_channel])
+
+        channel_list_state.change(
+            get_channel_choices, inputs=[channel_list_state], outputs=[search_channel]
+        )
 
         prev_btn.click(
             prev_page,
@@ -532,14 +542,7 @@ with gr.Blocks() as demo:
             [modal_html, page_info, current_page],
         )
 
-
-def init():
-    channels = "https://www.youtube.com/@onedayonepasuram6126,https://www.youtube.com/@srisookthi,https://www.youtube.com/@learn-aksharam"
-    for resp in index_channels(channels):
-        # print(resp)
-        pass
-
-
 if __name__ == "__main__":
-    # init()
+    for msg in init():
+        print(msg)
     demo.launch()
