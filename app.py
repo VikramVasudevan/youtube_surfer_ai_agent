@@ -69,7 +69,7 @@ def index_channels(channel_urls: str):
 
     # sync all channels, streaming progress
     for message, videos_count in sync_channels_from_youtube(yt_api_key, urls):
-        total_videos += videos_count  # accumulate actual number of videos indexed
+        total_videos = videos_count  # accumulate actual number of videos indexed
         yield message, gr.update(), gr.update()
 
     # final UI update
@@ -123,27 +123,42 @@ def list_channels_radio():
 
 
 # -------------------------------
-# Fetch channel videos as HTML table
+# Fetch channel videos as HTML table with pagination
 # -------------------------------
-def fetch_channel_html(channel_id: str):
-    # query your collection/db instead of YouTube API
+def fetch_channel_html(channel_id: str, page: int = 1, page_size: int = 10):
     collection = get_collection()
+    offset = (page - 1) * page_size
+
+    all_results = collection.get(
+        where={"channel_id": channel_id}, include=["metadatas"]
+    )
+    total_count = (
+        len(all_results["metadatas"])
+        if all_results and "metadatas" in all_results
+        else 0
+    )
     results = collection.get(
-        where={"channel_id": channel_id}, include=["documents", "metadatas"]
+        where={"channel_id": channel_id},
+        include=["documents", "metadatas"],
+        limit=page_size,
+        offset=offset,
     )
 
+    # handle empty
     if not results or not results.get("metadatas"):
-        return """
+        return f"""
         <div style="display:flex;justify-content:center;align-items:center;
                     height:200px;flex-direction:column;color:#666;">
-            ⚠️ No videos found for this channel.
+            ⚠️ No videos found for this channel (page {page}).
         </div>
         """
 
     videos = results["metadatas"]
 
     # build table
-    html = """
+    html = (
+        f"<div>Total: {total_count} videos</div>"
+        + """
     <table border="1" style="border-collapse:collapse;width:100%;font-family:sans-serif;">
         <thead style="background:#f0f0f0;">
             <tr>
@@ -155,11 +170,12 @@ def fetch_channel_html(channel_id: str):
         </thead>
         <tbody>
     """
+    )
 
-    for idx, v in enumerate(videos):
+    for idx, v in enumerate(videos, start=offset + 1):
         html += f"""
         <tr>
-            <td>{idx+1}</td>
+            <td>{idx}</td>
             <td>{v.get('video_title','')}</td>
             <td><a href="https://youtube.com/watch?v={v.get('video_id')}" 
                    target="_blank">Watch Video</a></td>
@@ -200,7 +216,45 @@ with gr.Blocks() as demo:
     # Modal to show channel videos
     with Modal(visible=False) as videos_list_modal:
         gr.Markdown("### Videos List")
+
+        # the HTML table that shows one page of videos
         modal_html = gr.HTML()
+
+        # row for pagination controls
+        with gr.Row(equal_height=True):
+            gr.Column()
+            prev_btn = gr.Button("⬅️ Prev", size="sm", variant="huggingface", scale=0)
+            page_info = gr.Textbox(
+                value="Page 1",
+                interactive=False,
+                show_label=False,
+                container=False,
+                scale=0,
+            )
+            next_btn = gr.Button("Next ➡️", size="sm", variant="huggingface", scale=0)
+            gr.Column()
+
+        current_page = gr.State(1)
+        page_size = 10  # change if you like
+
+        def update_table(channel_id, page):
+            return fetch_channel_html(channel_id, page, page_size), f"Page {page}"
+
+        def prev_page(channel_id, page):
+            new_page = max(1, page - 1)
+            return (
+                fetch_channel_html(channel_id, new_page, page_size),
+                f"Page {new_page}",
+                new_page,
+            )
+
+        def next_page(channel_id, page):
+            new_page = page + 1
+            return (
+                fetch_channel_html(channel_id, new_page, page_size),
+                f"Page {new_page}",
+                new_page,
+            )
 
     # Modal to add new channels
     with Modal(visible=False) as add_channel_modal:
@@ -435,6 +489,17 @@ with gr.Blocks() as demo:
             toggle_no_data_found,
             inputs=[channel_list_state],
             outputs=[main_content, main_content_no_channels_html],
+        )
+        prev_btn.click(
+            prev_page,
+            [channel_radio, current_page],  # you’ll need to pass channel_id here
+            [modal_html, page_info, current_page],
+        )
+
+        next_btn.click(
+            next_page,
+            [channel_radio, current_page],
+            [modal_html, page_info, current_page],
         )
 
 
