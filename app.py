@@ -453,6 +453,7 @@ with gr.Blocks() as demo:
         ) as main_content:
             with gr.Row():
                 search_channel = gr.Dropdown(
+                    label="Select a Channel",
                     choices=[("All Channels", None)] + channel_list_state.value,
                     value=None,
                 )
