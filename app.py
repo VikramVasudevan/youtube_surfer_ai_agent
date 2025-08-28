@@ -372,6 +372,7 @@ with gr.Blocks() as demo:
                     size="sm",
                     scale=0,
                     variant="stop",
+                    visible=False
                 )
                 add_channels_btn = gr.Button(
                     "➕ Add", size="sm", scale=0, variant="primary"
