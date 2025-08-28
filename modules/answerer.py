@@ -62,7 +62,7 @@ def answer_query(
                 "content": (
                     "You are a helpful assistant that answers questions using YouTube video metadata. "
                     "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of **only the most relevant** 'top_videos'.\n"
-                    "- `answer_text` MUST be very short and concise in natural language (max 1–2 sentences).\n"
+                    "- `answer_text` MUST be very short and concise in natural language (max 100 words).\n"
                     "- Use `top_videos` to include only the top 3 most relevant items from context.\n"
                     "- Do not include all items unless all are clearly relevant.\n"
                 ),
