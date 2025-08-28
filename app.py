@@ -515,6 +515,10 @@ with gr.Blocks() as demo:
             outputs=[channel_radio, no_channels_message],
         )
 
+        def get_channel_choices(channel_list):
+            return gr.update(choices=channel_list)
+        channel_list_state.change(get_channel_choices, inputs=[channel_list_state],outputs=[search_channel])
+
         prev_btn.click(
             prev_page,
             [channel_radio, current_page],  # you’ll need to pass channel_id here
