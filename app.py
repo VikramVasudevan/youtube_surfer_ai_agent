@@ -491,7 +491,12 @@ with gr.Blocks() as demo:
             toggle_no_data_found,
             inputs=[channel_list_state],
             outputs=[main_content, main_content_no_channels_html],
+        ).then(
+            toggle_no_data_found,
+            inputs=[channel_list_state],
+            outputs=[channel_radio, no_channels_message],
         )
+
         prev_btn.click(
             prev_page,
             [channel_radio, current_page],  # you’ll need to pass channel_id here
