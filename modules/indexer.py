@@ -2,7 +2,7 @@
 from typing import Dict, List
 from openai import OpenAI
 
-def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: int = 20):
+def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: int = 50):
     client = OpenAI()
 
     total = len(videos)
@@ -11,7 +11,10 @@ def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: i
     # Split into batches
     for start in range(0, total, batch_size):
         batch = videos[start:start + batch_size]
-        print(f"[INDEX] Processing batch {start+1} → {start+len(batch)} of {total}")
+        end = start + len(batch)
+        percent = round((end / total) * 100, 1)
+
+        print(f"[INDEX] Processing batch {start+1} → {end} of {total} — {percent}%")
 
         # Prepare text inputs
         texts = [f"{vid.get('title', '')} - {vid.get('description', '')}" for vid in batch]
@@ -49,6 +52,8 @@ def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: i
             ids=ids,
         )
 
-        print(f"[INDEX] ✅ Indexed {len(batch)} videos (total so far: {start+len(batch)}/{total})")
+        print(f"[INDEX] ✅ Indexed {len(batch)} videos (total so far: {end}/{total} — {percent}%)")
 
     print(f"[INDEX] 🎉 Finished indexing {total} videos for channel={channel_url}")
+    return total
+

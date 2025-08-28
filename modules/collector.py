@@ -15,11 +15,11 @@ def fetch_all_channel_videos(api_key: str, channel_url: str, max_results_per_cal
 
     final_videos = []
     for videos in fetch_channel_videos_by_id(api_key, channel_id, max_results_per_call):
-        final_videos.extend(videos)  # extend instead of append
+        final_videos.extend(videos)
         print("Fetched", len(final_videos))
-        yield (f"Fetched {len(final_videos)}", final_videos)
+        yield (f"Fetched {len(final_videos)}", videos)  # <-- only yield the *new* batch
 
-    yield (f"Fetched {len(final_videos)}", final_videos)
+    yield (f"Fetched {len(final_videos)}", [])  # final "summary"
 
 
 def fetch_channel_videos_by_id(api_key: str, channel_id: str, max_results=50):

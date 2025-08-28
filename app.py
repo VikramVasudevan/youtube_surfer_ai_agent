@@ -13,6 +13,8 @@ from modules.indexer import index_videos
 from modules.answerer import answer_query, LLMAnswer, VideoItem, build_video_html
 from dotenv import load_dotenv
 
+from youtube_sync import sync_channels_from_youtube
+
 load_dotenv()
 
 
@@ -58,52 +60,45 @@ def enable_if_not_none(question):
         return enable_component()
 
 
-# -------------------------------
-# Fetch & index channels
-# -------------------------------
-def refresh_channel(api_key, channel_url: str):
-    all_videos = []
-    for status, videos_batch in fetch_all_channel_videos(api_key, channel_url):
-        # enrich each video in the batch with channel_url
-        for v in videos_batch:
-            v["channel_url"] = channel_url
-        all_videos.extend(videos_batch)
-
-        # (optional) log progress
-        print(channel_url, status, "- total so far:", len(all_videos))
-
-    # index all at once
-    if all_videos:
-        print(f"{channel_url} - Adding {len(all_videos)} videos to database")
-        index_videos(all_videos, get_collection(), channel_url=channel_url)
-        print(f"{channel_url} - Loaded {len(all_videos)} videos to database")
-
-    return len(all_videos)
-
-
 def index_channels(channel_urls: str):
     yield "saving ...", gr.update(), gr.update()
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
+
     urls = [u.strip() for u in re.split(r"[\n,]+", channel_urls) if u.strip()]
-    total_videos = sum(refresh_channel(yt_api_key, url) for url in urls)
-    yield f"✅ Indexed {total_videos} videos from {len(urls)} channels.", gr.update(
-        choices=list_channels_radio()
-    ), list_channels_radio()
-    return
+    total_videos = 0
+
+    # sync all channels, streaming progress
+    for message, videos_count in sync_channels_from_youtube(yt_api_key, urls):
+        total_videos += videos_count  # accumulate actual number of videos indexed
+        yield message, gr.update(), gr.update()
+
+    # final UI update
+    yield (
+        f"✅ Indexed {total_videos} videos from {len(urls)} channels.",
+        gr.update(choices=list_channels_radio()),
+        list_channels_radio(),
+    )
 
 
 def refresh_all_channels():
     yt_api_key = os.environ["YOUTUBE_API_KEY"]
     channels = get_indexed_channels(get_collection())
+
     if not channels:
         return "⚠️ No channels available to refresh.", list_channels_radio()
-    total_videos = 0
+
+    # build list of URLs
+    urls = []
     for key, val in channels.items():
         url = val.get("channel_url") if isinstance(val, dict) else key
         if url:
-            total_videos += refresh_channel(yt_api_key, url)
+            urls.append(url)
+
+    # re-index all at once
+    total_videos = sync_channels_from_youtube(yt_api_key, urls)
+
     return (
-        f"🔄 Refreshed {len(channels)} channels, re-indexed {total_videos} videos.",
+        f"🔄 Refreshed {len(urls)} channels, re-indexed {total_videos} videos.",
         list_channels_radio(),
     )
 
@@ -134,8 +129,7 @@ def fetch_channel_html(channel_id: str):
     # query your collection/db instead of YouTube API
     collection = get_collection()
     results = collection.get(
-        where={"channel_id": channel_id},
-        include=["documents", "metadatas"]
+        where={"channel_id": channel_id}, include=["documents", "metadatas"]
     )
 
     if not results or not results.get("metadatas"):
@@ -175,7 +169,6 @@ def fetch_channel_html(channel_id: str):
 
     html += "</tbody></table>"
     return html
-
 
 
 # Delete a channel
@@ -252,16 +245,17 @@ with gr.Blocks() as demo:
         # Sidebar
         with gr.Sidebar() as my_sidebar:
             gr.Markdown("### 📺 Channels")
-            channel_list_state = gr.State([c for c in list_channels_radio()])
+            channel_list_values = list_channels_radio()
+            channel_list_state = gr.State(channel_list_values)
 
             no_channels_message = gr.Markdown(
                 "⚠️ **No channels available.**",
-                visible=False if channel_list_state.value else True,
+                visible=False if channel_list_values else True,
             )
             channel_radio = gr.Radio(
-                choices=channel_list_state.value,
+                choices=channel_list_values,
                 label="Select a Channel",
-                visible=True if channel_list_state.value else False,
+                visible=True if channel_list_values else False,
             )
 
             with gr.Row():
@@ -272,8 +266,19 @@ with gr.Blocks() as demo:
                     variant="secondary",
                     interactive=False,
                 )
+                refresh_btn = gr.Button(
+                    "🔄Refresh",
+                    size="sm",
+                    scale=0,
+                    variant="huggingface",
+                    visible=False,
+                )
                 refresh_all_btn = gr.Button(
-                    "🔄Refresh", size="sm", scale=0, variant="huggingface"
+                    "🔄Refresh",
+                    size="sm",
+                    scale=0,
+                    variant="huggingface",
+                    visible=False,
                 )
                 add_channels_btn = gr.Button(
                     "➕ Add", size="sm", scale=0, variant="primary"
@@ -291,6 +296,7 @@ with gr.Blocks() as demo:
                 outputs=[refresh_status, channel_radio],
             )
 
+            refresh_btn.click(fn=list_channels_radio, outputs=[channel_radio])
             add_channels_btn.click(close_component, outputs=[my_sidebar]).then(
                 show_component, outputs=[add_channel_modal]
             )
