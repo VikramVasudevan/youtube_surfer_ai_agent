@@ -25,12 +25,14 @@ class LLMAnswer(BaseModel):
 # -------------------------------
 # Main Function
 # -------------------------------
-def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
+def answer_query(
+    query: str, collection, top_k: int = 5, channel_id: str = None
+) -> LLMAnswer:
     """
     Answer a user query using YouTube video metadata.
     Returns an LLMAnswer object with textual answer + list of videos.
     """
-    results = retrieve_videos(query, collection, top_k=top_k)
+    results = retrieve_videos(query, collection, top_k=top_k, channel_id=channel_id)
 
     if not results:
         return LLMAnswer(answer_text="No relevant videos found.", top_videos=[])
@@ -61,7 +63,7 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
                     "You are a helpful assistant that answers questions using YouTube video metadata. "
                     "Return your response strictly as the LLMAnswer class, including 'answer_text' and a list of **only the most relevant** 'top_videos'.\n"
                     "- `answer_text` MUST be very short and concise in natural language (max 1–2 sentences).\n"
-                    "- Use `top_videos` to include only the 2–3 most relevant items from context.\n"
+                    "- Use `top_videos` to include only the top 3 most relevant items from context.\n"
                     "- Do not include all items unless all are clearly relevant.\n"
                 ),
             },
@@ -77,7 +79,6 @@ def answer_query(query: str, collection, top_k: int = 5) -> LLMAnswer:
     answer_text = llm_answer.answer_text
     video_html = build_video_html(llm_answer.top_videos)
     return answer_text, video_html
-
 
 
 def build_video_html(videos: list[VideoItem]) -> str:
@@ -103,7 +104,7 @@ def build_video_html(videos: list[VideoItem]) -> str:
                 allowfullscreen>
             </iframe>
         </div>
-        """        
+        """
         html += f"""
         <tr>
             <td>{v.description}</td>

@@ -198,8 +198,10 @@ def delete_channel(channel_url: str):
 # -------------------------------
 # LLM query
 # -------------------------------
-def handle_query(query: str):
-    answer_text, video_html = answer_query(query, get_collection())
+def handle_query(query: str, search_channel_id: str):
+    answer_text, video_html = answer_query(
+        query, get_collection(), channel_id=search_channel_id, top_k=10
+    )
     if not answer_text:
         answer_text = "No answer available."
     if not video_html or not isinstance(video_html, str):
@@ -351,7 +353,9 @@ with gr.Blocks() as demo:
             def refresh_channel_list():
                 return gr.update(choices=list_channels_radio())
 
-            refresh_btn.click(fn=refresh_channel_list, outputs=[channel_radio]).then(fn=list_channels_radio, outputs=[channel_list_state])
+            refresh_btn.click(fn=refresh_channel_list, outputs=[channel_radio]).then(
+                fn=list_channels_radio, outputs=[channel_list_state]
+            )
             add_channels_btn.click(close_component, outputs=[my_sidebar]).then(
                 show_component, outputs=[add_channel_modal]
             )
@@ -380,7 +384,9 @@ with gr.Blocks() as demo:
                 outputs=[channel_radio, no_channels_message],
             )
             ## Onload refresh the channel list.
-            gr.on(fn=refresh_channel_list, outputs=[channel_radio]).then(fn=list_channels_radio, outputs=[channel_list_state])
+            gr.on(fn=refresh_channel_list, outputs=[channel_radio]).then(
+                fn=list_channels_radio, outputs=[channel_list_state]
+            )
         # Main Column
         main_content_no_channels_html = gr.HTML(
             """
@@ -413,6 +419,10 @@ with gr.Blocks() as demo:
             scale=3, visible=True if channel_list_state.value else False
         ) as main_content:
             with gr.Row():
+                search_channel = gr.Dropdown(
+                    choices=[("All Channels", None)] + channel_list_state.value,
+                    value=None,
+                )
                 question = gr.Textbox(
                     label="Ask a Question",
                     placeholder="e.g., What topics did they cover on AI ethics?",
@@ -429,9 +439,9 @@ with gr.Blocks() as demo:
 
             gr.Examples(
                 [
-                    "Show me some videos that mention Ranganatha.",
-                    "Slokas that mention gajendra moksham",
-                    "Poorvikalyani Raga Alapana",
+                    "Ranganatha",
+                    "Gajendra moksham",
+                    "Poorvikalyani",
                     "Virutham from chathusloki",
                     "Lesson 9.15 from Aksharam",
                 ],
@@ -443,7 +453,11 @@ with gr.Blocks() as demo:
 
             ask_btn.click(show_loading, outputs=[ask_status]).then(
                 disable_component, outputs=[ask_btn]
-            ).then(handle_query, inputs=[question], outputs=[answer, video_embed]).then(
+            ).then(
+                handle_query,
+                inputs=[question, search_channel],
+                outputs=[answer, video_embed],
+            ).then(
                 enable_component, outputs=[ask_btn]
             ).then(
                 clear_component, outputs=[ask_status]
@@ -452,7 +466,11 @@ with gr.Blocks() as demo:
             question.change(enable_if_not_none, inputs=[question], outputs=[ask_btn])
             question.submit(show_loading, outputs=[ask_status]).then(
                 disable_component, outputs=[ask_btn]
-            ).then(handle_query, inputs=[question], outputs=[answer, video_embed]).then(
+            ).then(
+                handle_query,
+                inputs=[question, search_channel],
+                outputs=[answer, video_embed],
+            ).then(
                 enable_component, outputs=[ask_btn]
             ).then(
                 clear_component, outputs=[ask_status]
