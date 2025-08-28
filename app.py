@@ -439,7 +439,7 @@ with gr.Blocks() as demo:
 
             gr.Examples(
                 [
-                    "Ranganatha",
+                    "Srirangam",
                     "Gajendra moksham",
                     "Poorvikalyani",
                     "Virutham from chathusloki",
