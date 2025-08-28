@@ -5,6 +5,7 @@ import threading
 import gradio as gr
 from gradio_modal import Modal
 import chromadb
+from downloader import export_channel_json
 from modules.collector import fetch_all_channel_videos
 from modules.db import (
     delete_channel_from_collection,
@@ -229,6 +230,18 @@ def handle_query(query: str, search_channel_id: str):
 with gr.Blocks() as demo:
     gr.Markdown("### 📺 YouTube Channel Surfer")
 
+    with Modal(visible=False) as download_modal:
+        with gr.Row():
+            gr.Column()
+            download_status = gr.Markdown("## Preparing the file ...")
+            gr.Column()
+        with gr.Row():
+            gr.Column()
+            download_ready_btn = gr.DownloadButton(
+                label="Click to Download", visible=False, variant="primary", scale=0
+            )
+            gr.Column()
+
     # Modal to show channel videos
     with Modal(visible=False) as videos_list_modal:
         gr.Markdown("### Videos List")
@@ -331,6 +344,13 @@ with gr.Blocks() as demo:
             )
 
             with gr.Row():
+                export_btn = gr.Button(
+                    "⏬ Download",
+                    size="sm",
+                    scale=0,
+                    variant="primary",
+                    interactive=False,
+                )
                 show_videos_btn = gr.Button(
                     "🎬Videos",
                     size="sm",
@@ -455,7 +475,7 @@ with gr.Blocks() as demo:
             )
 
             submitted_question = gr.Markdown()
-            ask_status = gr.Markdown()            
+            ask_status = gr.Markdown()
             answer = gr.Markdown()
             video_embed = gr.HTML()  # iframe embeds
 
@@ -482,7 +502,7 @@ with gr.Blocks() as demo:
 
             channel_radio.change(
                 enable_if_not_none, inputs=[channel_radio], outputs=[show_videos_btn]
-            )
+            ).then(enable_if_not_none, inputs=[channel_radio], outputs=[export_btn])
             show_videos_btn.click(disable_component, outputs=[show_videos_btn]).then(
                 close_component, outputs=[my_sidebar]
             ).then(
@@ -531,6 +551,17 @@ with gr.Blocks() as demo:
             next_page,
             [channel_radio, current_page],
             [modal_html, page_info, current_page],
+        )
+        export_btn.click(close_component, outputs=[my_sidebar]).then(
+            show_component, outputs=[download_status]
+        ).then(hide_component, outputs=[download_ready_btn]).then(
+            show_component, outputs=[download_modal]
+        ).then(
+            export_channel_json, inputs=channel_radio, outputs=download_ready_btn
+        ).then(
+            hide_component, outputs=[download_status]
+        ).then(
+            show_component, outputs=[download_ready_btn]
         )
 
 if __name__ == "__main__":
