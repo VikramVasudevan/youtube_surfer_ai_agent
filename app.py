@@ -516,7 +516,7 @@ with gr.Blocks() as demo:
         )
 
         def get_channel_choices(channel_list):
-            return gr.update(choices=channel_list)
+            return gr.update(choices=[("All Channels", None)] + channel_list)
         channel_list_state.change(get_channel_choices, inputs=[channel_list_state],outputs=[search_channel])
 
         prev_btn.click(
