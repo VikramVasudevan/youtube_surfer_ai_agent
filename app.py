@@ -238,7 +238,10 @@ with gr.Blocks() as demo:
         with gr.Row():
             gr.Column()
             download_ready_btn = gr.DownloadButton(
-                label="Click to Download", visible=False, variant="primary", scale=0
+                label="Click to Download",
+                visible=False,
+                variant="primary",
+                scale=0,
             )
             gr.Column()
 
@@ -459,7 +462,7 @@ with gr.Blocks() as demo:
                 )
                 question = gr.Textbox(
                     label="Ask a Question",
-                    placeholder="e.g., What topics did they cover on AI ethics?",
+                    placeholder="e.g., How to write the letter Aa in grantham?",
                     submit_btn=True,
                 )
                 gr.Column(scale=2)

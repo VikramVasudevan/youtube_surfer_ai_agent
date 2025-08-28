@@ -17,4 +17,4 @@ def export_channel_json(channel_id):
     fd, path = tempfile.mkstemp(suffix=".json")
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False, default=json_serializer)
-    return path  # return file path for gr.File / gr.DownloadButton
+    return path
