@@ -2,6 +2,8 @@
 from typing import List, Dict
 from openai import OpenAI
 
+from modules.embeddings import get_embedding
+
 
 def retrieve_videos(
     query: str, collection, top_k: int = 3, channel_id: str = None
@@ -9,11 +11,7 @@ def retrieve_videos(
     client = OpenAI()
 
     # Create embedding for query
-    embedding = (
-        client.embeddings.create(input=query, model="text-embedding-3-small")
-        .data[0]
-        .embedding
-    )
+    embedding = get_embedding(query) 
 
     # Query Chroma
     if not channel_id:

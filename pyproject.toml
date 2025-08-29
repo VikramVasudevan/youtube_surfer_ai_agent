@@ -12,4 +12,5 @@ dependencies = [
     "gradio>=5.44.0",
     "gradio-modal>=0.0.4",
     "openai>=1.102.0",
+    "sentence-transformers>=5.1.0",
 ]

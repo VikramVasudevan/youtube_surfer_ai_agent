@@ -2,6 +2,8 @@
 from typing import Dict, List
 from openai import OpenAI
 
+from modules.embeddings import get_embedding
+
 def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: int = 50):
     client = OpenAI()
 
@@ -19,13 +21,7 @@ def index_videos(videos: List[Dict], collection, channel_url: str, batch_size: i
         # Prepare text inputs
         texts = [f"{vid.get('title', '')} - {vid.get('description', '')}" for vid in batch]
 
-        # Call embeddings API in batch
-        response = client.embeddings.create(
-            input=texts,
-            model="text-embedding-3-small"
-        )
-
-        embeddings = [item.embedding for item in response.data]
+        embeddings = [get_embedding(text) for text in texts]
 
         # Build metadata + ids
         metadatas, ids = [], []
