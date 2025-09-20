@@ -1,23 +1,30 @@
 import json
-from pytube import Playlist
+from yt_dlp import YoutubeDL
 
 # Replace with your playlist URL
-playlist_url = "https://www.youtube.com/playlist?list=PLvyr8QuerDZwoii1SFwkTR5PXBmMe2awS"
+playlist_url = "https://www.youtube.com/playlist?list=PLvyr8QuerDZx3lFCLqVS7pvECTNCFOgJQ"
 
-# Create Playlist object
-playlist = Playlist(playlist_url)
+# yt-dlp options
+ydl_opts = {
+    'quiet': True,          # suppress console output
+    'skip_download': True,  # only get metadata
+    'extract_flat': True,   # only get video IDs, no download
+}
 
-# Ensure video URLs are preserved in playlist order
-video_urls = [video_url for video_url in playlist.video_urls]
-
-# Print all video URLs in order
 urls = []
-for i, url in enumerate(video_urls, start=471):
-    urls.append({
-        "scripture": "divya_prabandham",
-        "global_index": i,
-        "video_url": url,
-        "type": "virutham"
-    })
+
+with YoutubeDL(ydl_opts) as ydl:
+    info_dict = ydl.extract_info(playlist_url, download=False)
+    entries = info_dict.get('entries', [])
+
+    for i, entry in enumerate(entries, start=13):
+        # Skip removed/private videos
+        if entry and 'id' in entry:
+            urls.append({
+                "scripture": "divya_prabandham",
+                "global_index": i,
+                "video_url": f"https://www.youtube.com/watch?v={entry['id']}",
+                "type": "virutham"
+            })
 
 print(json.dumps(urls, indent=1))
