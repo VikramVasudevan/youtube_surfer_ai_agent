@@ -1674,6 +1674,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytube"
+version = "15.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/e7/16fec46c8d255c4bbc4b185d89c91dc92cdb802836570d8004d0db169c91/pytube-15.0.0.tar.gz", hash = "sha256:076052efe76f390dfa24b1194ff821d4e86c17d41cb5562f3a276a8bcbfc9d1d", size = 67229, upload-time = "2023-05-07T19:39:01.903Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/51/64/bcf8632ed2b7a36bbf84a0544885ffa1d0b4bcf25cc0903dba66ec5fdad9/pytube-15.0.0-py3-none-any.whl", hash = "sha256:07b9904749e213485780d7eb606e5e5b8e4341aa4dccf699160876da00e12d78", size = 57594, upload-time = "2023-05-07T19:38:59.191Z" },
+]
+
+[[package]]
 name = "pytz"
 version = "2025.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2424,6 +2433,7 @@ dependencies = [
     { name = "gradio" },
     { name = "gradio-modal" },
     { name = "openai" },
+    { name = "pytube" },
     { name = "sentence-transformers" },
 ]
 
@@ -2436,6 +2446,7 @@ requires-dist = [
     { name = "gradio", specifier = ">=5.44.0" },
     { name = "gradio-modal", specifier = ">=0.0.4" },
     { name = "openai", specifier = ">=1.102.0" },
+    { name = "pytube", specifier = ">=15.0.0" },
     { name = "sentence-transformers", specifier = ">=5.1.0" },
 ]
 
